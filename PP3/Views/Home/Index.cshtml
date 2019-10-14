@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <form asp-action="AddUrl" class="form-inline row" asp-controller="Patents" method="post">
+        <label>Url:   </label>
+        <input type="text" name="url" size="65" />
+        <input type="submit" value="Добавить" class="btn btn-primary" />
+    </form>
+</div>

@@ -1,0 +1,8 @@
+runtime: aspnetcore
+env: flex
+
+beta_settings:
+    cloud_sql_instances: "moonlit-outlet-255715:us-central1:patent-instance=tcp:5432"
+
+vpc_access_connector:
+    name: "projects/moonlit-outlet-255715/locations/us-central1/connectors/all"
