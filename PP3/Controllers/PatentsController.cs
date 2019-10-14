@@ -10,6 +10,7 @@ using PP3.Models;
 using System.Diagnostics;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace PP3.Controllers
 {
@@ -28,69 +29,116 @@ namespace PP3.Controllers
         }
 
         [HttpPost]
-        public void AddUrl(string url)
+        public async Task<IActionResult> AddUrl(string url)
         {
             if (url.Contains("patft"))
             {
-                //await Task.Factory.StartNew(() =>
-                //{
-                //try
-                //{
-                string CpcPattern = @"[A-Z]([0-9]){2}[A-Z]";
-
-                HtmlWeb web = new HtmlWeb();
-                var htmlDoc = web.Load(url);
-
-                var dateCount = 0;
-                DateTime date = DateTime.Now;
-                string CPC = "";
-
-                var node = htmlDoc.DocumentNode.SelectSingleNode("//head/title");
-                var query = (from cell in htmlDoc.DocumentNode.SelectNodes("//td") select cell.InnerText).ToList<string>();
-
-                var name = (from cell in htmlDoc.DocumentNode.SelectNodes("//font") select cell.InnerText).ToList<string>()
-                    .Where(x => x.Length > 4).First();
-
-                foreach (var cell in query)
-                {
-                    if (Regex.IsMatch(cell, CpcPattern))
-                        CPC += cell;
-                }
-                string autor = query[8].Replace(',', ' ').Replace("&nbsp", "").Replace('\n', ' ').Replace(';', ' ').Replace("et al.", "").Trim();
-                foreach (var cell in query)
-                {
-                    bool ok = DateTime.TryParse(cell, out date);
-                    if (ok && dateCount > 1) break;
-                    if (ok && dateCount < 2) dateCount++;
-                }
-                var p = new Patent()
-                {
-                    Autors = autor,
-                    Country = "US",
-                    Name = name,
-                    PublicationDate = date,
-                    Link = url,
-                    CPC = CPC,
-                };
-
-                //var optionsBuilder = new DbContextOptionsBuilder<PatentDbContext>();
-                //optionsBuilder.UseNpgsql("userid=postgres;Pwd=1234;Host=cloudsql;Database=PatentDb;");
-                //using (var _c = new PatentDbContext(optionsBuilder.Options))
-                //{
+                Patent p = ParsePathft(url);
                 _context.Patents.Add(p);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+            }
+            if (url.Contains("fips"))
+            {
+                Patent p = ParseFips(url);
+                _context.Patents.Add(p);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index", "Home");
 
-                RedirectToAction("Index", "Home");
-                //}
-                //}
-                //catch
-                //{
+        }
 
-                //}
+        private static Patent ParsePathft(string url)
+        {
+            string CpcPattern = @"[A-Z]([0-9]){2}[A-Z]";
 
-                //});
+            HtmlWeb web = new HtmlWeb();
+            var htmlDoc = web.Load(url);
+
+            var dateCount = 0;
+            DateTime date = DateTime.Now;
+            string CPC = "";
+
+            var node = htmlDoc.DocumentNode.SelectSingleNode("//head/title");
+            var query = (from cell in htmlDoc.DocumentNode.SelectNodes("//td") select cell.InnerText).ToList<string>();
+
+            var name = (from cell in htmlDoc.DocumentNode.SelectNodes("//font") select cell.InnerText).ToList<string>()
+                .Where(x => x.Length > 4).First();
+
+            foreach (var cell in query)
+            {
+                if (Regex.IsMatch(cell, CpcPattern))
+                    CPC += cell;
+            }
+            string autor = query[8].Replace(',', ' ').Replace("&nbsp", "").Replace('\n', ' ').Replace(';', ' ').Replace("et al.", "").Trim();
+            foreach (var cell in query)
+            {
+                bool ok = DateTime.TryParse(cell, out date);
+                if (ok && dateCount > 1) break;
+                if (ok && dateCount < 2) dateCount++;
+            }
+            CPC = CPC.Replace("&nbsp", " ");
+            var p = new Patent()
+            {
+                Autors = autor,
+                Country = "US",
+                Name = name,
+                PublicationDate = date,
+                Link = url,
+                CPC = CPC,
+            };
+            return p;
+        }
+        private static Patent ParseFips(string url)
+        {
+            HtmlWeb web = new HtmlWeb();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            var enc1251 = Encoding.GetEncoding(1251);
+            web.OverrideEncoding = enc1251;
+            //var doc = new HtmlDocument();
+            var doc = web.Load(url);
+            
+
+            //string path = @"D:\Программы (все)\ИЗ №2691214.html";
+            string CpcPattern = @"[A-Z]([0-9]){2}[A-Z]";
+            string DatePattern = @"([0-9]){2}[.]([0-9]){2}[.]([0-9]){4}";
+            //doc.Load(path);
+
+            var node = doc.DocumentNode.SelectSingleNode("//head/title");
+            var query = (from cell in doc.DocumentNode.SelectNodes("//span") select cell.InnerText).ToList<string>();
+
+            string CPC = "";
+
+            foreach (var cell in query)
+            {
+                if (Regex.IsMatch(cell, CpcPattern))
+                    CPC += cell;
             }
 
+            var name = doc.DocumentNode.SelectSingleNode("//p[@id='B542']/b").InnerText;
+            query = (from cell in doc.DocumentNode.SelectNodes("//a") select cell.InnerText).ToList<string>();
+
+            DateTime date = DateTime.Now;
+            foreach (var cell in query)
+            {
+                if (Regex.IsMatch(cell, DatePattern))
+                    DateTime.TryParse(cell, out date);
+            }
+
+            var autors = (from cell in doc.DocumentNode.SelectNodes("//td[@id='bibl']/p/b")
+                          select cell.InnerText).FirstOrDefault<string>().Replace(",", ", ").Replace("\n", "");
+
+            var link = url;
+            var p = new Patent()
+            {
+                Autors = autors,
+                Country = "RU",
+                Name = name,
+                PublicationDate = date,
+                Link = url,
+                CPC = CPC,
+            };
+            return p;
         }
 
         #region Useless
