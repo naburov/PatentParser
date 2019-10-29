@@ -22,9 +22,6 @@
                 @Html.DisplayNameFor(model => model.CPC)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Link)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Country)
             </th>
             <th>
@@ -37,7 +34,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                <a href="{item.Link}">@Html.DisplayFor(modelItem => item.Name)</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.PublicationDate)
