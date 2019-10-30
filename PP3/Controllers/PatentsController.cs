@@ -43,6 +43,13 @@ namespace PP3.Controllers
                 _context.Patents.Add(p);
                 await _context.SaveChangesAsync();
             }
+            if (url.Contains("eapo"))
+            {
+                Patent p = ParseEapatis(url);
+                _context.Patents.Add(p);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction("Index", "Home");
 
         }
@@ -140,6 +147,56 @@ namespace PP3.Controllers
             };
             return p;
         }
+        private static Patent ParseEapatis(string url)
+        {
+            HtmlWeb web = new HtmlWeb();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            var enc1251 = Encoding.GetEncoding(1251);
+            web.OverrideEncoding = enc1251;
+            //var doc = new HtmlDocument();
+            var doc = web.Load(url);
+
+            var props = CreateDictionaryFromUrl(doc);
+
+            var CPC = props["Индексы Международной патентной классификации"];
+            var date = DateTime.Parse(props["Дата подачи заявки"]);
+            var name = props["Название изобретения"];
+            var autor = props["Сведения о заявителе(ях)"];
+            var link = url;
+
+            var p = new Patent()
+            {
+                Autors = autor,
+                Country = "RU",
+                Name = name,
+                PublicationDate = date,
+                Link = url,
+                CPC = CPC,
+            };
+            return p;
+
+        }
+        private static Dictionary<string, string> CreateDictionaryFromUrl(HtmlDocument doc)
+        {
+            var res = new Dictionary<string, string>();
+            var dict = doc.DocumentNode.SelectNodes("//tr");
+
+            foreach (var pair in dict)
+            {
+                var count = pair.ChildNodes.Count;
+                if (count == 2)
+                {
+                    var Key = pair.ChildNodes[0].FirstChild.InnerText;
+                    Key = Regex.Replace(Key, "[(][0-9]+[)]", "").Trim();
+                    var Value = pair.ChildNodes[1].FirstChild.InnerText;
+                    Value = Regex.Replace(Value, "[(][0-9]+[)]", "").Trim();
+                    res.Add(Key, Value);
+                }
+            }
+            return res;
+        }
+        
 
         #region Useless
         // GET: Patents
