@@ -33,15 +33,21 @@ namespace PP3.Controllers
         {
             if (url.Contains("patft"))
             {
-                Patent p = ParsePathft(url);
-                _context.Patents.Add(p);
-                await _context.SaveChangesAsync();
+                await Task.Run(() =>
+                {
+                    Patent p = ParsePathft(url);
+                    _context.Patents.Add(p);
+                    _context.SaveChanges();
+                });
             }
             if (url.Contains("fips"))
             {
-                Patent p = ParseFips(url);
-                _context.Patents.Add(p);
-                await _context.SaveChangesAsync();
+                await Task.Run(() =>
+                {
+                    Patent p = ParseFips(url);
+                    _context.Patents.Add(p);
+                    _context.SaveChanges();
+                });
             }
             if (url.Contains("eapo"))
             {
@@ -49,9 +55,7 @@ namespace PP3.Controllers
                 _context.Patents.Add(p);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction("Index", "Home");
-
         }
 
         private static Patent ParsePathft(string url)
@@ -104,7 +108,7 @@ namespace PP3.Controllers
             web.OverrideEncoding = enc1251;
             //var doc = new HtmlDocument();
             var doc = web.Load(url);
-            
+
 
             //string path = @"D:\Программы (все)\ИЗ №2691214.html";
             string CpcPattern = @"[A-Z]([0-9]){2}[A-Z]";
@@ -168,7 +172,7 @@ namespace PP3.Controllers
             var p = new Patent()
             {
                 Autors = autor,
-                Country = "RU",
+                Country = "EAPATIS",
                 Name = name,
                 PublicationDate = date,
                 Link = url,
@@ -196,7 +200,7 @@ namespace PP3.Controllers
             }
             return res;
         }
-        
+
 
         #region Useless
         // GET: Patents
