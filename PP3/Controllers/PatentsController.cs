@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 using PP3.Models;
 
 using System.Diagnostics;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
 using System.Text;
+using OfficeOpenXml;
+using System.IO;
 
 namespace PP3.Controllers
 {
@@ -201,6 +204,37 @@ namespace PP3.Controllers
             return res;
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public FileResult Export()
+        {            
+            using (ExcelPackage pck = new ExcelPackage())
+            {
+                
+                var ws = pck.Workbook.Worksheets.Add("Документы");
+
+                var export = _context.Patents;
+
+                List<string> names = export.First().GetType().GetProperties().Select(p => p.Name).ToList();
+                int asciicode = (int)'A';
+                for (int i = 1; i <= names.Count(); i++)
+                {
+                    ws.Cells[Convert.ToChar(asciicode++).ToString() + "1"].Value = names[i - 1];
+                }
+
+                ws.Cells["A2"].LoadFromCollection(export);
+                ws.Cells.AutoFitColumns();
+
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                var enc = Encoding.GetEncoding(437);
+
+                byte[] arr = pck.GetAsByteArray();
+                return File(arr, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Patents.xlsx" );
+                //pck.SaveAs(Response.OutputStream);
+                //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                //Response.AddHeader("content-disposition", "attachment;  filename=Документы.xlsx");
+            }
+        }
 
         #region Useless
         // GET: Patents
