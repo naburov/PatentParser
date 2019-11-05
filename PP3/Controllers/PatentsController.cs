@@ -165,24 +165,29 @@ namespace PP3.Controllers
             var doc = web.Load(url);
 
             var props = CreateDictionaryFromUrl(doc);
-
-            var CPC = props["Индексы Международной патентной классификации"];
-            var date = DateTime.Parse(props["Дата подачи заявки"]);
-            var name = props["Название изобретения"];
-            var autor = props["Сведения о заявителе(ях)"];
-            var link = url;
-
-            var p = new Patent()
+            try
             {
-                Autors = autor,
-                Country = "EAPATIS",
-                Name = name,
-                PublicationDate = date,
-                Link = url,
-                CPC = CPC,
-            };
-            return p;
+                var CPC = props["Индексы Международной патентной классификации"];
+                var date = DateTime.Parse(props["Дата подачи евразийской заявки"]);
+                var name = props["Название изобретения"];
+                var autor = props["Сведения о заявителе(ях)"];
+                var link = url;
 
+                var p = new Patent()
+                {
+                    Autors = autor,
+                    Country = "EAPATIS",
+                    Name = name,
+                    PublicationDate = date,
+                    Link = url,
+                    CPC = CPC,
+                };
+                return p;
+            }
+            catch
+            {
+                return null;
+            }            
         }
         private static Dictionary<string, string> CreateDictionaryFromUrl(HtmlDocument doc)
         {
@@ -203,6 +208,9 @@ namespace PP3.Controllers
             }
             return res;
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -230,6 +238,7 @@ namespace PP3.Controllers
 
                 byte[] arr = pck.GetAsByteArray();
                 return File(arr, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Patents.xlsx" );
+
                 //pck.SaveAs(Response.OutputStream);
                 //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 //Response.AddHeader("content-disposition", "attachment;  filename=Документы.xlsx");
