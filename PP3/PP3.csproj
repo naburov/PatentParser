@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\Home.jsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\Home.jsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.1.0" />
     <PackageReference Include="Google.Api.Gax" Version="2.10.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="2.0.1" />
@@ -36,7 +44,11 @@
     </None>
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="Components\" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" package_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
 

@@ -1,6 +1,6 @@
 ﻿class SearchBox extends React.Component {
     render() {
-        return (
+        return (            
             <div className="search-container">
                 <textarea>
                     Search Text
