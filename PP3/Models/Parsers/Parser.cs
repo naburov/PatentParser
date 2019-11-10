@@ -31,10 +31,13 @@ namespace PP3.Models.Parsers
         }
 
         public abstract bool TryParse(string url, out Patent patent);
+
         public Parser()
         {
 
         }
+
+        public abstract bool TryParse(HtmlDocument doc, out Patent p);
     }
 
     

@@ -15,22 +15,27 @@ using System.Text;
 using OfficeOpenXml;
 using System.IO;
 using PP3.Models.Parsers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 
 namespace PP3.Controllers
 {
     public class PatentsController : Controller
     {
         private readonly PatentDbContext _context;
+        private IHostingEnvironment _appEnvironment;
         private Dictionary<string, Parser> _parsers;
 
-        public PatentsController(PatentDbContext context)
+        public PatentsController(PatentDbContext context, IHostingEnvironment appEnvironment)
         {
             _context = context;
+            _appEnvironment = appEnvironment;
 
             _parsers = new Dictionary<string, Parser>();
             _parsers.Add("uspto", new PathftParser());
             _parsers.Add("fips", new FipsParser());
             _parsers.Add("eapo", new EapatisParser());
+            _parsers.Add("espacenet", new EspaceNetParser());
 
         }
 
@@ -280,6 +285,36 @@ namespace PP3.Controllers
                 //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
                 //Response.AddHeader("content-disposition", "attachment;  filename=Документы.xlsx");
             }
+        }
+
+        [HttpPost("UploadHtml")]
+        public async Task<IActionResult> UploadHtml(IFormFile uploadedFile)
+        {
+            var filePaths = new List<string>();
+            await Task.Run(() =>
+            {
+                string path = "/Files/" + uploadedFile.FileName;
+                // сохраняем файл в папку Files в каталоге wwwroot
+                using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                {
+                    uploadedFile.CopyTo(fileStream);
+                }
+
+                Patent p = new Patent();
+                var doc = new HtmlDocument();
+                doc.Load(_appEnvironment.WebRootPath + path);
+                var title = doc.DocumentNode.SelectSingleNode("//title").InnerText.Split(' ');
+                if (title.Contains("Espacenet"))
+                {
+                    _parsers["espacenet"].TryParse(doc, out p);
+                }
+
+            });
+
+            // process uploaded files
+            // Don't rely on or trust the FileName property without validation.
+
+            return RedirectToAction("Index", "Home");
         }
 
         #region Useless

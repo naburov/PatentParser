@@ -61,6 +61,11 @@ namespace PP3.Models.Parsers
             }
         }
 
+        public override bool TryParse(HtmlDocument doc, out Patent p)
+        {
+            throw new NotImplementedException();
+        }
+
         public PathftParser() : base()
         {
 

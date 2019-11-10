@@ -12,6 +12,21 @@
             <input type="text" class="form-control" name="url" size="65" />
             <input type="submit" value="Запарсить ссылочку" class="btn btn-primary" />
         </form>
+
+        <p>Или прикрепите его в качестве html документа</p>
+        <form method="post" enctype="multipart/form-data" asp-controller="Patents" asp-action="UploadHtml">
+            <div class="form-group">
+                <div class="col-md-10">
+                    <p>Upload one or more files using this form:</p>
+                    <input type="file" name="uploadedFile" multiple />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-10">
+                    <input type="submit" class="btn btn-primary" value="Upload" />
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
