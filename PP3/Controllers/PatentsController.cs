@@ -14,16 +14,24 @@ using System.Text.RegularExpressions;
 using System.Text;
 using OfficeOpenXml;
 using System.IO;
+using PP3.Models.Parsers;
 
 namespace PP3.Controllers
 {
     public class PatentsController : Controller
     {
         private readonly PatentDbContext _context;
+        private Dictionary<string, Parser> _parsers;
 
         public PatentsController(PatentDbContext context)
         {
             _context = context;
+
+            _parsers = new Dictionary<string, Parser>();
+            _parsers.Add("uspto", new PathftParser());
+            _parsers.Add("fips", new FipsParser());
+            _parsers.Add("eapo", new EapatisParser());
+
         }
 
         private bool PatentExists(int id)
@@ -34,30 +42,59 @@ namespace PP3.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUrl(string url)
         {
-            if (url.Contains("patft"))
+            Patent patent = null;
+            bool ok;
+            await Task.Run(() =>
             {
-                await Task.Run(() =>
+                var websiteDomains = url.Split('.');
+                string parserName = "";
+
+                foreach (var key in _parsers.Keys)
                 {
-                    Patent p = ParsePathft(url);
-                    _context.Patents.Add(p);
-                    _context.SaveChanges();
-                });
-            }
-            if (url.Contains("fips"))
-            {
-                await Task.Run(() =>
+                    if (websiteDomains.Contains(key))
+                        parserName = key;
+                }
+
+                try
                 {
-                    Patent p = ParseFips(url);
-                    _context.Patents.Add(p);
+                    ok = _parsers[parserName].TryParse(url, out patent);
+                }
+                catch (Exception e)
+                {
+                    ok = false;
+                }
+
+                if (ok)
+                {
+                    _context.Patents.Add(patent);
                     _context.SaveChanges();
-                });
-            }
-            if (url.Contains("eapo"))
-            {
-                Patent p = ParseEapatis(url);
-                _context.Patents.Add(p);
-                await _context.SaveChangesAsync();
-            }
+                }
+            });
+
+            //if (url.Contains("patft"))
+            //{
+            //    await Task.Run(() =>
+            //    {
+            //        Patent p = ParsePathft(url);
+            //        _context.Patents.Add(p);
+            //        _context.SaveChanges();
+            //    });
+            //}
+            //if (url.Contains("fips"))
+            //{
+            //    await Task.Run(() =>
+            //    {
+            //        Patent p = ParseFips(url);
+            //        _context.Patents.Add(p);
+            //        _context.SaveChanges();
+            //    });
+            //}
+            //if (url.Contains("eapo"))
+            //{
+            //    Patent p = ParseEapatis(url);
+            //    _context.Patents.Add(p);
+            //    await _context.SaveChangesAsync();
+            //}
             return RedirectToAction("Index", "Home");
         }
 
@@ -187,7 +224,7 @@ namespace PP3.Controllers
             catch
             {
                 return null;
-            }            
+            }
         }
         private static Dictionary<string, string> CreateDictionaryFromUrl(HtmlDocument doc)
         {
@@ -215,10 +252,10 @@ namespace PP3.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public FileResult Export()
-        {            
+        {
             using (ExcelPackage pck = new ExcelPackage())
             {
-                
+
                 var ws = pck.Workbook.Worksheets.Add("Документы");
 
                 var export = _context.Patents;
@@ -237,7 +274,7 @@ namespace PP3.Controllers
                 var enc = Encoding.GetEncoding(437);
 
                 byte[] arr = pck.GetAsByteArray();
-                return File(arr, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Patents.xlsx" );
+                return File(arr, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Patents.xlsx");
 
                 //pck.SaveAs(Response.OutputStream);
                 //Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

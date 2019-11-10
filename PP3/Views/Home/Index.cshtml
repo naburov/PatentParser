@@ -3,15 +3,15 @@
 }
 
 <div class="hero-unit">
-    <p></p>
-    <p>
-        <div class="text-center">
-            <h3>Добро пожаловать!</h3>
-    <p>Чтобы добавить патент вставьте ссылку ниже и нажмите "Добавить"</p>
-    <form asp-action="AddUrl" class="form-inline row" asp-controller="Patents" method="post">
-        <input type="text" class="form-control" name="url" size="65" />
-    </form>
-    <input type="submit" value="Запарсить ссылочку" class="btn btn-primary" />
+
+    <div class="text-center">
+        <h3>Добро пожаловать!</h3>
+
+        <p>Чтобы добавить патент вставьте ссылку ниже и нажмите "Добавить"</p>
+        <form asp-action="AddUrl" class="form-inline row" asp-controller="Patents" method="post">
+            <input type="text" class="form-control" name="url" size="65" />
+            <input type="submit" value="Запарсить ссылочку" class="btn btn-primary" />
+        </form>
+    </div>
 </div>
-    </p>
-</div>
+
