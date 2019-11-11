@@ -3,14 +3,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PP3.Models;
 using PP3.Models.Parsers;
 using System;
+using System.Text.RegularExpressions;
 
 namespace ParsersTests
 {
     [TestClass]
-    public class EspaceNetParsers
+    public class ParserTesting
     {
         static Parser EspaceNetParser = new EspaceNetParser();
         static Parser DepatisNetParser = new DepatisnetParser();
+        static Parser PathftParser = new PathftParser();
 
         [TestMethod]
         public void TryParseEapatis()
@@ -38,6 +40,30 @@ namespace ParsersTests
             doc.Load("D:\\Программы (все)\\HTML-страницы\\DEPATISnet _ Bibliographische Daten.html");
 
             bool ok = DepatisNetParser.TryParse(doc, out p);
+
+            Assert.IsTrue(ok);
+        }
+
+        [TestMethod]
+        public void TryPathft_GetNormalTitle()
+        {
+            Patent p = new Patent();
+
+            var url = "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=17&f=G&l=50&co1=AND&d=PTXT&s1=AI&OS=AI&RS=AI";
+            bool ok = PathftParser.TryParse(url, out p);
+            ok = !int.TryParse(p.Name, out int number) && ok;
+
+            Assert.IsTrue(ok);
+        }
+
+        [TestMethod]
+        public void TryPathft_GetNormalTitle2()
+        {
+            Patent p = new Patent();
+
+            var url = "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=31&f=G&l=50&co1=AND&d=PTXT&s1=AI&OS=AI&RS=AI";
+            bool ok = PathftParser.TryParse(url, out p);
+            ok = !int.TryParse(p.Name, out int number) && ok;
 
             Assert.IsTrue(ok);
         }

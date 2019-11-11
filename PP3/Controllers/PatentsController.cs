@@ -300,17 +300,27 @@ namespace PP3.Controllers
                     uploadedFile.CopyTo(fileStream);
                 }
 
-                Patent p = new Patent();
+                Patent patent  = new Patent();
                 var doc = new HtmlDocument();
                 doc.Load(_appEnvironment.WebRootPath + path);
                 var title = doc.DocumentNode.SelectSingleNode("//title").InnerText.Split(' ');
                 if (title.Contains("Espacenet"))
                 {
-                    _parsers["espacenet"].TryParse(doc, out p);
+                    var ok = _parsers["espacenet"].TryParse(doc, out patent);
+                    if (ok)
+                    {
+                        _context.Patents.Add(patent);
+                        _context.SaveChanges();
+                    }
                 }
                 else if (title.Contains("DEPATISnet"))
                 {
-                    _parsers["depatisnet"].TryParse(doc, out p);
+                    var ok = _parsers["depatisnet"].TryParse(doc, out patent);
+                    if (ok)
+                    {
+                        _context.Patents.Add(patent);
+                        _context.SaveChanges();
+                    }
                 }
 
             });

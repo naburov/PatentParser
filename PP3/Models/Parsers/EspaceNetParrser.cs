@@ -30,7 +30,7 @@ namespace PP3.Models.Parsers
 
             try
             {
-                var name = doc.DocumentNode.SelectSingleNode("//div[@id='pagebody']/h3").InnerText.Trim();
+                var name = doc.DocumentNode.SelectSingleNode("//div[@id='pagebody']/h3").InnerText.Trim().Replace("&nbsp;", string.Empty); ;
                 var autors = doc.DocumentNode.SelectSingleNode("//span[@id='inventors']").InnerText.Trim();
 
                 var CPC = string.Join(' ', (from a in doc.DocumentNode.SelectNodes("//a")

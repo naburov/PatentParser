@@ -15,6 +15,7 @@ namespace PP3.Models.Parsers
             p = null;
 
             string CpcPattern = @"[A-Z]([0-9]){2}[A-Z]";
+            string NamePatern = @"([\w]+[\s]{1,})+";
 
             HtmlWeb web = new HtmlWeb();
             var htmlDoc = web.Load(url);
@@ -24,10 +25,10 @@ namespace PP3.Models.Parsers
             string CPC = "";
 
             var node = htmlDoc.DocumentNode.SelectSingleNode("//head/title");
-            var query = (from cell in htmlDoc.DocumentNode.SelectNodes("//td") select cell.InnerText).ToList<string>();
+            var query = (from cell in htmlDoc.DocumentNode.SelectNodes("//td") select cell.InnerText.Trim()).ToList<string>();
 
-            var name = (from cell in htmlDoc.DocumentNode.SelectNodes("//font") select cell.InnerText).ToList<string>()
-                .Where(x => x.Length > 4).First();
+            var name = (from cell in htmlDoc.DocumentNode.SelectNodes("//font") select cell.InnerText.Trim()).ToList<string>()[3];
+                        
 
             try
             {
@@ -48,7 +49,7 @@ namespace PP3.Models.Parsers
                 {
                     Autors = autor,
                     Country = "US",
-                    Name = name,
+                    Name = name.ToString(),
                     PublicationDate = date,
                     Link = url,
                     CPC = CPC,
