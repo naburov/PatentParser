@@ -26,12 +26,6 @@ namespace PP3.Models.Parsers
             {
                 var table = doc.DocumentNode.SelectNodes("//table[@class='tab_detail']/tbody/tr").ToList();
 
-
-                //var name = (from tr in table
-                //            where string.Join(' ', (from td in tr.ChildNodes select Regex.Replace(td.InnerText, "[^A-Za-z0-9]", "")).ToArray())
-                //            .Contains("Titel")
-                //            select tr.ChildNodes[7].InnerText).ToString();
-
                 var name = (from list in (from tr in table select GetClearList(tr)).ToList()
                             where list.Contains("Titel")
                             select list).ToList()[0][3];
@@ -39,13 +33,15 @@ namespace PP3.Models.Parsers
                 var autors = (from list in (from tr in table select GetClearList(tr)).ToList()
                               where list.Contains("Erfinder")
                               select list).ToList()[0][3];
+                try
+                {
+                    var date = ((from dates in Regex.Matches(doc.DocumentNode
+                               .SelectSingleNode("//table[@class='tab_detail']").InnerText, DatePattern)
+                                 select DateTime.Parse(dates.Value)).ToList()).Max();
+                }catch(Exception e)
+                {
 
-                var date = ((from dates in Regex.Matches(doc.DocumentNode
-                           .SelectSingleNode("//table[@class='tab_detail']").InnerText, DatePattern)
-                            select DateTime.Parse(dates.Value)).ToList()).Max();
-
-
-                
+                }
 
                 var CPC = string.Join(' ', from match in Regex.Matches(doc.Text, CpcPattern) select match.Value);
 
@@ -55,11 +51,17 @@ namespace PP3.Models.Parsers
                 {
                     Autors = autors,
                     Country = "DEU",
-                    Name = name.ToString(),
-                    PublicationDate = date,
+                    Name = name.ToString(),                    
                     Link = url,
                     CPC = CPC,
                 };
+                try
+                {
+                    p.PublicationDate = date.ToUniversalTime();
+                }catch(Exception e)
+                {
+                   // p.PublicationDate = new DateTime(date.Ticks);
+                }
                 return true;
             }
             catch (Exception e)
