@@ -6,6 +6,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+
 namespace PP3.Models.Parsers
 {
     public abstract class Parser
@@ -28,6 +32,19 @@ namespace PP3.Models.Parsers
                 }
             }
             return res;
+        }
+
+        public static HtmlDocument GetPage(string url)
+        {
+            var doc = new HtmlDocument();
+
+            using (var driver = new ChromeDriver())
+            {
+                driver.Navigate().GoToUrl(url);
+                var pageSource = driver.PageSource;
+                doc.LoadHtml(pageSource);
+            }
+            return doc;
         }
 
         public abstract bool TryParse(string url, out Patent patent);

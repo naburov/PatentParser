@@ -36,7 +36,7 @@ namespace PP3.Controllers
             _parsers.Add("fips", new FipsParser());
             _parsers.Add("eapo", new EapatisParser());
             _parsers.Add("espacenet", new EspaceNetParser());
-
+            _parsers.Add("depatisnet", new DepatisnetParser());
         }
 
         private bool PatentExists(int id)
@@ -307,6 +307,10 @@ namespace PP3.Controllers
                 if (title.Contains("Espacenet"))
                 {
                     _parsers["espacenet"].TryParse(doc, out p);
+                }
+                else if (title.Contains("DEPATISnet"))
+                {
+                    _parsers["depatisnet"].TryParse(doc, out p);
                 }
 
             });

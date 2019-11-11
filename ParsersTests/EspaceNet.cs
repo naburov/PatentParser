@@ -10,6 +10,7 @@ namespace ParsersTests
     public class EspaceNetParsers
     {
         static Parser EspaceNetParser = new EspaceNetParser();
+        static Parser DepatisNetParser = new DepatisnetParser();
 
         [TestMethod]
         public void TryParseEapatis()
@@ -27,5 +28,20 @@ namespace ParsersTests
             bool ok = EspaceNetParser.TryParse(doc, out p);
             Assert.IsTrue(ok);
         }
+
+        [TestMethod]
+        public void TryParseDepatisNet()
+        {
+            Patent p = new Patent();
+
+            var doc = new HtmlDocument();
+            doc.Load("D:\\Программы (все)\\HTML-страницы\\DEPATISnet _ Bibliographische Daten.html");
+
+            bool ok = DepatisNetParser.TryParse(doc, out p);
+
+            Assert.IsTrue(ok);
+        }
+
+
     }
 }
