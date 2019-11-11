@@ -33,9 +33,10 @@ namespace PP3.Models.Parsers
                 var autors = (from list in (from tr in table select GetClearList(tr)).ToList()
                               where list.Contains("Erfinder")
                               select list).ToList()[0][3];
+                DateTime date = DateTime.MinValue;
                 try
                 {
-                    var date = ((from dates in Regex.Matches(doc.DocumentNode
+                    date = ((from dates in Regex.Matches(doc.DocumentNode
                                .SelectSingleNode("//table[@class='tab_detail']").InnerText, DatePattern)
                                  select DateTime.Parse(dates.Value)).ToList()).Max();
                 }catch(Exception e)
