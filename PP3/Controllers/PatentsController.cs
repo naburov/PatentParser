@@ -37,6 +37,7 @@ namespace PP3.Controllers
             _parsers.Add("eapo", new EapatisParser());
             _parsers.Add("espacenet", new EspaceNetParser());
             _parsers.Add("depatisnet", new DepatisnetParser());
+            _parsers.Add("gc", new GcParser());
         }
 
         private bool PatentExists(int id)
